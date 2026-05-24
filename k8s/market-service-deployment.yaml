@@ -1,0 +1,83 @@
+# ============================================================
+# IntelliWealth – Market Intelligence Service Kubernetes Deployment
+# ============================================================
+apiVersion: v1
+kind: Secret
+metadata:
+  name: market-service-secret
+  namespace: intelliwealth
+type: Opaque
+stringData:
+  DATABASE_URL: postgresql://intelliwealth:intelliwealth_secret_2026@postgres:5432/intelliwealth_db
+  REDIS_URL: redis://redis:6379/0
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: market-service
+  namespace: intelliwealth
+  labels:
+    app: market-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: market-service
+  template:
+    metadata:
+      labels:
+        app: market-service
+    spec:
+      containers:
+        - name: market-service
+          image: intelliwealth/market-service:latest
+          ports:
+            - containerPort: 8001
+          envFrom:
+            - secretRef:
+                name: market-service-secret
+          env:
+            - name: MARKET_SERVICE_HOST
+              value: "0.0.0.0"
+            - name: MARKET_SERVICE_PORT
+              value: "8001"
+            - name: ENVIRONMENT
+              value: "production"
+            - name: MARKET_SERVICE_CORS_ORIGINS
+              value: "https://intelliwealth.io"
+            - name: REDIS_CACHE_TTL
+              value: "300"
+            - name: REDIS_ANALYTICS_TTL
+              value: "600"
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          readinessProbe:
+            httpGet:
+              path: /readiness
+              port: 8001
+            initialDelaySeconds: 25
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /liveness
+              port: 8001
+            initialDelaySeconds: 35
+            periodSeconds: 15
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: market-service
+  namespace: intelliwealth
+spec:
+  selector:
+    app: market-service
+  ports:
+    - port: 8001
+      targetPort: 8001
+  type: ClusterIP

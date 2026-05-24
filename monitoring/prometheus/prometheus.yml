@@ -1,0 +1,76 @@
+# ============================================================
+# IntelliWealth – Prometheus Configuration
+# ============================================================
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  scrape_timeout: 10s
+
+  external_labels:
+    cluster: intelliwealth
+    environment: production
+
+# ---- Alert Rules ----
+rule_files:
+  - "alerts.yml"
+
+# ---- Scrape Targets ----
+scrape_configs:
+
+  # Prometheus self-monitoring
+  - job_name: "prometheus"
+    static_configs:
+      - targets: ["localhost:9090"]
+
+  # ---- Portfolio Service ----
+  - job_name: "portfolio-service"
+    metrics_path: /metrics
+    scrape_interval: 10s
+    static_configs:
+      - targets: ["portfolio-service:8000"]
+        labels:
+          service: portfolio-service
+          tier: backend
+
+  # ---- Market Service ----
+  - job_name: "market-service"
+    metrics_path: /metrics
+    scrape_interval: 10s
+    static_configs:
+      - targets: ["market-service:8001"]
+        labels:
+          service: market-service
+          tier: backend
+
+  # ---- AI Insight Service ----
+  - job_name: "ai-insight-service"
+    metrics_path: /metrics
+    scrape_interval: 10s
+    static_configs:
+      - targets: ["ai-insight-service:8002"]
+        labels:
+          service: ai-insight-service
+          tier: backend
+
+  # ---- Kubernetes Service Discovery (EKS) ----
+  # Uncomment for Kubernetes deployments:
+  #
+  # - job_name: "kubernetes-pods"
+  #   kubernetes_sd_configs:
+  #     - role: pod
+  #       namespaces:
+  #         names:
+  #           - intelliwealth
+  #   relabel_configs:
+  #     - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+  #       action: keep
+  #       regex: true
+  #     - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+  #       action: replace
+  #       target_label: __metrics_path__
+  #       regex: (.+)
+  #     - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_port, __meta_kubernetes_pod_ip]
+  #       action: replace
+  #       target_label: __address__
+  #       regex: (.+);(.+)
+  #       replacement: $2:$1

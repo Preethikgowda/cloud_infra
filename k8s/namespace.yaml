@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: intelliwealth
+  labels:
+    app.kubernetes.io/name: intelliwealth
+    app.kubernetes.io/part-of: intelliwealth-platform

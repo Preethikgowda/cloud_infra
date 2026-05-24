@@ -1,0 +1,20 @@
+# ============================================================
+# IntelliWealth – Market Service
+# ============================================================
+apiVersion: v1
+kind: Service
+metadata:
+  name: market-service
+  namespace: intelliwealth
+  labels:
+    app: market-service
+    app.kubernetes.io/part-of: intelliwealth
+    app.kubernetes.io/component: backend
+spec:
+  selector:
+    app: market-service
+  ports:
+    - port: 8001
+      targetPort: 8001
+      protocol: TCP
+  type: ClusterIP

@@ -1,0 +1,98 @@
+# ============================================================
+# IntelliWealth – Prometheus Alert Rules
+# ============================================================
+groups:
+  - name: intelliwealth.service_health
+    rules:
+      # Service down for > 1 minute
+      - alert: ServiceDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "{{ $labels.job }} is down"
+          description: "Service {{ $labels.job }} has been unreachable for more than 1 minute."
+
+      # High error rate (> 5% of requests returning 5xx)
+      - alert: HighErrorRate
+        expr: |
+          (
+            sum(rate(http_requests_total{status_code=~"5.."}[5m])) by (service)
+            /
+            sum(rate(http_requests_total[5m])) by (service)
+          ) > 0.05
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High error rate on {{ $labels.service }}"
+          description: "{{ $labels.service }} has >5% error rate (current: {{ $value | humanizePercentage }})"
+
+      # High latency (p95 > 2 seconds)
+      - alert: HighLatency
+        expr: |
+          histogram_quantile(0.95, 
+            sum(rate(http_request_duration_seconds_bucket[5m])) by (le, service)
+          ) > 2
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High p95 latency on {{ $labels.service }}"
+          description: "p95 latency is {{ $value | humanizeDuration }} on {{ $labels.service }}"
+
+  - name: intelliwealth.ai_service
+    rules:
+      # AI response time > 10 seconds
+      - alert: AISlowResponse
+        expr: |
+          histogram_quantile(0.95,
+            sum(rate(ai_response_duration_seconds_bucket[5m])) by (le, provider)
+          ) > 10
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: "AI inference is slow (p95 > 10s)"
+          description: "AI provider {{ $labels.provider }} p95 response time: {{ $value | humanizeDuration }}"
+
+      # AI error rate > 10%
+      - alert: AIHighErrorRate
+        expr: |
+          (
+            sum(rate(ai_errors_total[5m])) by (endpoint)
+            /
+            sum(rate(ai_requests_total[5m])) by (endpoint)
+          ) > 0.10
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "AI error rate >10% on {{ $labels.endpoint }}"
+
+  - name: intelliwealth.infrastructure
+    rules:
+      # High memory usage (> 85%)
+      - alert: HighMemoryUsage
+        expr: |
+          (
+            container_memory_usage_bytes
+            /
+            container_spec_memory_limit_bytes
+          ) > 0.85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory usage on {{ $labels.pod }}"
+
+      # Pod restart loop
+      - alert: PodRestartLoop
+        expr: increase(kube_pod_container_status_restarts_total[1h]) > 3
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Pod {{ $labels.pod }} is in a restart loop"
+          description: "{{ $labels.pod }} has restarted {{ $value }} times in the last hour"

@@ -1,0 +1,26 @@
+# ============================================================
+# IntelliWealth – AI Insight Service Dependencies
+# ============================================================
+
+# Core
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+pydantic==2.10.4
+pydantic-settings==2.7.1
+
+# AWS Bedrock (prepared)
+boto3==1.35.86
+botocore==1.35.86
+
+# LangChain (prepared for RAG/agents)
+langchain-core==0.3.28
+langchain-community==0.3.13
+langchain-aws==0.2.12
+
+# Utilities
+httpx==0.28.1
+python-dotenv==1.0.1
+Jinja2==3.1.5
+
+# Health / Monitoring
+psutil==6.1.1

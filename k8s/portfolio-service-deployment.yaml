@@ -1,0 +1,79 @@
+# ============================================================
+# IntelliWealth – Portfolio Service Kubernetes Deployment
+# ============================================================
+apiVersion: v1
+kind: Secret
+metadata:
+  name: portfolio-service-secret
+  namespace: intelliwealth
+type: Opaque
+stringData:
+  DATABASE_URL: postgresql://intelliwealth:intelliwealth_secret_2026@postgres:5432/intelliwealth_db
+  JWT_SECRET_KEY: change-me-to-a-secure-random-string-in-production
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: portfolio-service
+  namespace: intelliwealth
+  labels:
+    app: portfolio-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: portfolio-service
+  template:
+    metadata:
+      labels:
+        app: portfolio-service
+    spec:
+      containers:
+        - name: portfolio-service
+          image: intelliwealth/portfolio-service:latest
+          ports:
+            - containerPort: 8000
+          envFrom:
+            - secretRef:
+                name: portfolio-service-secret
+          env:
+            - name: PORTFOLIO_SERVICE_HOST
+              value: "0.0.0.0"
+            - name: PORTFOLIO_SERVICE_PORT
+              value: "8000"
+            - name: ENVIRONMENT
+              value: "production"
+            - name: PORTFOLIO_SERVICE_CORS_ORIGINS
+              value: "https://intelliwealth.io"
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          readinessProbe:
+            httpGet:
+              path: /readiness
+              port: 8000
+            initialDelaySeconds: 20
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /liveness
+              port: 8000
+            initialDelaySeconds: 30
+            periodSeconds: 15
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: portfolio-service
+  namespace: intelliwealth
+spec:
+  selector:
+    app: portfolio-service
+  ports:
+    - port: 8000
+      targetPort: 8000
+  type: ClusterIP

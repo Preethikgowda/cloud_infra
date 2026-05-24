@@ -1,0 +1,19 @@
+# ============================================================
+# IntelliWealth – Portfolio Service ConfigMap
+# ============================================================
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: portfolio-service-config
+  namespace: intelliwealth
+  labels:
+    app: portfolio-service
+    app.kubernetes.io/part-of: intelliwealth
+data:
+  PORTFOLIO_SERVICE_HOST: "0.0.0.0"
+  PORTFOLIO_SERVICE_PORT: "8000"
+  PORTFOLIO_SERVICE_LOG_LEVEL: "info"
+  PORTFOLIO_SERVICE_CORS_ORIGINS: "https://${DOMAIN_NAME}"
+  ENVIRONMENT: "production"
+  JWT_ALGORITHM: "HS256"
+  JWT_ACCESS_TOKEN_EXPIRE_MINUTES: "30"

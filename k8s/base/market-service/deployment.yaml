@@ -1,0 +1,63 @@
+# ============================================================
+# IntelliWealth – Market Service Deployment
+# ============================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: market-service
+  namespace: intelliwealth
+  labels:
+    app: market-service
+    app.kubernetes.io/part-of: intelliwealth
+    app.kubernetes.io/component: backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: market-service
+  template:
+    metadata:
+      labels:
+        app: market-service
+        app.kubernetes.io/part-of: intelliwealth
+    spec:
+      containers:
+        - name: market-service
+          image: ${ECR_REGISTRY}/intelliwealth/market-service:latest
+          ports:
+            - containerPort: 8001
+              protocol: TCP
+          envFrom:
+            - secretRef:
+                name: market-service-secret
+            - configMapRef:
+                name: market-service-config
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          readinessProbe:
+            httpGet:
+              path: /readiness
+              port: 8001
+            initialDelaySeconds: 25
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /liveness
+              port: 8001
+            initialDelaySeconds: 40
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 3
+          startupProbe:
+            httpGet:
+              path: /health
+              port: 8001
+            failureThreshold: 30
+            periodSeconds: 5
