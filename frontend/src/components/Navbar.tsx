@@ -11,8 +11,16 @@ const Navbar: React.FC<NavbarProps> = ({ onMenuToggle }) => {
   return (
     <header className="sticky top-0 z-30 border-b border-slate-800/90 bg-[#020617]/90 backdrop-blur">
       <div className="mx-auto flex h-16 w-full max-w-[1600px] items-center justify-between px-4 md:px-6 xl:px-10">
-        <button onClick={onMenuToggle} className="rounded-lg border border-slate-700 px-3 py-1.5 text-sm text-slate-300 md:hidden">
-          Menu
+        <button
+          onClick={onMenuToggle}
+          className="flex h-10 w-10 items-center justify-center rounded-lg border border-slate-700 text-slate-300 transition hover:bg-slate-800 md:hidden"
+          aria-label="Open menu"
+        >
+          <span className="flex flex-col gap-1.5">
+            <span className="block h-0.5 w-5 rounded-full bg-current" />
+            <span className="block h-0.5 w-5 rounded-full bg-current" />
+            <span className="block h-0.5 w-5 rounded-full bg-current" />
+          </span>
         </button>
         <div className="hidden text-sm text-slate-400 md:block">IntelliWealth workspace</div>
         <div className="flex items-center gap-3 text-sm text-slate-300">

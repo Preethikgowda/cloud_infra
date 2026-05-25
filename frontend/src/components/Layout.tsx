@@ -5,11 +5,11 @@ import Navbar from './Navbar';
 import PageContainer from './PageContainer';
 
 const SIDEBAR_EXPANDED = 280;
-const SIDEBAR_COLLAPSED = 80;
+const SIDEBAR_COLLAPSED = 88;
 
 const Layout: React.FC = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(() => window.innerWidth >= 768 && window.innerWidth < 1024);
   const [viewportWidth, setViewportWidth] = useState(window.innerWidth);
 
   useEffect(() => {
@@ -20,8 +20,12 @@ const Layout: React.FC = () => {
       if (width < 768) {
         setCollapsed(false);
         setMobileOpen(false);
-      } else if (width < 1280) {
+      } else if (width < 1024) {
         setCollapsed(true);
+        setMobileOpen(false);
+      } else {
+        setCollapsed(false);
+        setMobileOpen(false);
       }
     };
 
@@ -30,8 +34,9 @@ const Layout: React.FC = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const sidebarWidth = collapsed ? SIDEBAR_COLLAPSED : SIDEBAR_EXPANDED;
-  const contentOffset = viewportWidth >= 768 ? sidebarWidth : 0;
+  const isMobile = viewportWidth < 768;
+  const sidebarWidth = isMobile ? SIDEBAR_EXPANDED : collapsed ? SIDEBAR_COLLAPSED : SIDEBAR_EXPANDED;
+  const contentOffset = isMobile ? 0 : sidebarWidth;
 
   return (
     <div className="min-h-screen bg-[#020617] text-slate-100">
@@ -39,11 +44,12 @@ const Layout: React.FC = () => {
         isOpen={mobileOpen}
         collapsed={collapsed}
         width={sidebarWidth}
+        isMobile={isMobile}
         onToggle={() => setMobileOpen((value) => !value)}
         onCollapseToggle={() => setCollapsed((value) => !value)}
       />
 
-      <div className="min-h-screen transition-all duration-300" style={{ marginLeft: contentOffset }}>
+      <div className="min-h-screen flex-1 transition-[margin-left] duration-300 ease-in-out" style={{ marginLeft: contentOffset }}>
         <Navbar onMenuToggle={() => setMobileOpen((value) => !value)} />
         <PageContainer>
           <Outlet />
