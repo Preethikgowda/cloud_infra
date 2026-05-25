@@ -6,6 +6,9 @@ echo "  IntelliWealth – Market Intelligence Service"
 echo "  Starting up..."
 echo "============================================"
 
+echo "[entrypoint] Waiting for database..."
+python -c "from app.database import wait_for_database; wait_for_database()"
+
 # Note: Database migrations are centralized in portfolio-service to avoid conflicts
 # on a shared database with separate Alembic tracking. Both services would try to
 # create alembic_version tables and track different revision histories in the same DB.

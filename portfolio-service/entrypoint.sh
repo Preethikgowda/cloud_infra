@@ -6,6 +6,9 @@ echo "  IntelliWealth – Portfolio Service"
 echo "  Starting up..."
 echo "============================================"
 
+echo "[entrypoint] Waiting for database..."
+python -c "from app.database import wait_for_database; wait_for_database()"
+
 # Run Alembic migrations
 echo "[entrypoint] Running database migrations..."
 alembic upgrade head

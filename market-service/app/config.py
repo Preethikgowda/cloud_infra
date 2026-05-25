@@ -30,7 +30,7 @@ class Settings(BaseSettings):
     MARKET_SERVICE_HOST: str = "0.0.0.0"
     MARKET_SERVICE_PORT: int = 8001
     MARKET_SERVICE_LOG_LEVEL: str = "info"
-    MARKET_SERVICE_CORS_ORIGINS: str = "http://localhost:3000,http://localhost:5173,http://localhost:8000"
+    MARKET_SERVICE_CORS_ORIGINS: str = ""
 
     # ---- Risk Engine Thresholds ----
     RISK_HIGH_EQUITY_THRESHOLD: float = 80.0  # equity > 80% → HIGH risk
@@ -40,7 +40,11 @@ class Settings(BaseSettings):
     @property
     def cors_origins(self) -> List[str]:
         """Parse CORS origins from comma-separated string."""
-        return [origin.strip() for origin in self.MARKET_SERVICE_CORS_ORIGINS.split(",")]
+        return [
+            origin.strip()
+            for origin in self.MARKET_SERVICE_CORS_ORIGINS.split(",")
+            if origin.strip()
+        ]
 
     class Config:
         env_file = ".env"

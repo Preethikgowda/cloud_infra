@@ -30,12 +30,16 @@ class Settings(BaseSettings):
     PORTFOLIO_SERVICE_HOST: str = "0.0.0.0"
     PORTFOLIO_SERVICE_PORT: int = 8000
     PORTFOLIO_SERVICE_LOG_LEVEL: str = "info"
-    PORTFOLIO_SERVICE_CORS_ORIGINS: str = "http://localhost:3000,http://localhost:5173"
+    PORTFOLIO_SERVICE_CORS_ORIGINS: str = ""
 
     @property
     def cors_origins(self) -> List[str]:
         """Parse CORS origins from comma-separated string."""
-        return [origin.strip() for origin in self.PORTFOLIO_SERVICE_CORS_ORIGINS.split(",")]
+        return [
+            origin.strip()
+            for origin in self.PORTFOLIO_SERVICE_CORS_ORIGINS.split(",")
+            if origin.strip()
+        ]
 
     class Config:
         env_file = ".env"

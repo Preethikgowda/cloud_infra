@@ -9,7 +9,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import get_settings
-from app.database import Base, engine
+from app.database import Base, engine, wait_for_database
 from app.routers import auth, customers, health, portfolios
 
 settings = get_settings()
@@ -31,6 +31,8 @@ async def lifespan(app: FastAPI):
     logger.info("  Environment: %s", settings.ENVIRONMENT)
     logger.info("  Version: %s", settings.APP_VERSION)
     logger.info("=" * 60)
+
+    wait_for_database()
 
     # Create tables if they don't exist (Alembic handles migrations in production)
     Base.metadata.create_all(bind=engine)
