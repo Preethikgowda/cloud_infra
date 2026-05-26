@@ -1,6 +1,10 @@
 services:
   portfolio-service:
     image: ${DOCKERHUB_USERNAME}/intelliwealth-portfolio-service:${IMAGE_TAG:-latest}
+    build:
+      context: ./portfolio-service
+      dockerfile: Dockerfile
+      target: runtime
     restart: always
     ports:
       - "8000:8000"
@@ -18,6 +22,10 @@ services:
 
   market-service:
     image: ${DOCKERHUB_USERNAME}/intelliwealth-market-service:${IMAGE_TAG:-latest}
+    build:
+      context: ./market-service
+      dockerfile: Dockerfile
+      target: runtime
     restart: always
     ports:
       - "8001:8001"

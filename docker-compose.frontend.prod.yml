@@ -1,6 +1,12 @@
 services:
   frontend:
     image: ${DOCKERHUB_USERNAME}/intelliwealth-frontend:${IMAGE_TAG:-latest}
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: runtime
+      args:
+        VITE_API_BASE_URL: /api/v1
     restart: always
     ports:
       - "80:80"
